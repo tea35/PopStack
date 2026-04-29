@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# ![アイコン](./docs/icon.png "icon") PopStack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 概要
+PopStackは、「あとで読む」として溜まりがちなWeb記事（積読）の消化をサポートするChrome拡張機能です。
+気になる記事をワンクリックで専用のブックマークフォルダに保存し、毎日指定した時間にランダムで1記事を対象に通知を行います。
 
-Currently, two official plugins are available:
+## 主要機能
+1. **スタック（保存）とポップ（削除）**: 拡張機能アイコンをクリックし、表示中のページを専用のブックマークに保存・解除します。
+2. **デイリーリマインダー**: 設定した時間に、保存された記事の中からランダムに1件を選び、デスクトップ通知で提示します。
+3. **環境設定**: 通知の有効化・無効化、および通知時間の変更が行えます。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 強み・工夫点
 
-## React Compiler
+### 1. 極限まで削ぎ落とした操作性
+タグ付けやカテゴリ分類といった複雑な管理機能をあえて排除しました。ツールバーのアイコンを1回クリックするだけで保存（Stack）され、もう一度クリックすると解除（Pop）されるシンプルなトグル形式を採用し、ユーザーのブラウジングを妨げません。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. ブラウザ標準機能の拡張によるデータポータビリティ
+独自の外部データベースを構築せず、Chromeネイティブのブックマーク機能（`chrome.bookmarks` API）のデータ層を直接活用しています。これにより、アカウント登録や外部サーバーへの通信が不要となり、ユーザーのプライバシーを保護しつつ、ブラウザ標準の同期機能による複数端末間のデータ共有を自然な形で実現しています。
 
-## Expanding the ESLint configuration
+### 3. ランダム抽出による「積読」の確実な消化
+一般的な「あとで読む」ツールは、リストが膨大になるにつれてユーザーの認知負荷が上がり、結果として放置されがちです。PopStackでは、Chromeの `alarms` API を用いて毎日1記事だけをランダムに抽出して通知します。ユーザーから「何を読むか選ぶ」という選択の負担を奪うことで、記事の消化を習慣化させる仕組みを取り入れています。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 4. モダンで直感的な設定UI
+設定画面には React と Tailwind CSS を採用しています。ユーザーの集中を削がないよう、白を基調としたシンプルで一貫性のあるレイアウトを構築し、ステータスの保存状態などを即座にフィードバックするインタラクティブな設計を行っています。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## スクリーンショット
+<!-- docs/images フォルダに画像を配置した場合の例です。適宜変更してください -->
+<div align="center">
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  ##### 保存
+  <img src="./docs/screenshot-save.png" width="50%" alt="拡張機能のアイコンクリックによる保存">
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  ##### 保存場所
+  <img src="./docs/screenshot-stack.png" width="50%" alt="ブックマークバーに保存">
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+  ##### 通知
+  <img src="./docs/screenshot-notification.png" width="50%" alt="デイリー通知のポップアップ">
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+  ##### 設定画面
+  <img src="./docs/screenshot-options.png" width="50%" alt="設定画面">
+</div>
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 技術スタック
+* **Frontend**: React 19, TypeScript, Tailwind CSS
+* **Build**: Vite
+* **Chrome Extension API (Manifest V3)**:
+  * `chrome.bookmarks`: 記事の永続化
+  * `chrome.alarms` / `chrome.storage`: バックグラウンドでの時間管理と起動
+  * `chrome.notifications`: OSネイティブ通知の呼び出しまっている量を常に意識させることで、能動的な学習を促します。
