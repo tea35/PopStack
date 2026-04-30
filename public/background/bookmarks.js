@@ -22,10 +22,9 @@ export async function updateBadgeCount() {
 
   if (count > 0) {
     chrome.action.setBadgeText({ text: count.toString() });
-    // PopStackのテーマカラー（ネイビー系）に合わせてプレッシャーを軽減
     chrome.action.setBadgeBackgroundColor({ color: "#2c3e50" });
   } else {
-    chrome.action.setBadgeText({ text: "" }); // 0件の場合は非表示
+    chrome.action.setBadgeText({ text: "" });
   }
   return count;
 }
@@ -40,8 +39,6 @@ export async function handleBookmarkAction(tab) {
     const bookmark = existing.find((item) => item.url === tab.url);
     if (bookmark) {
       await chrome.bookmarks.remove(bookmark.id);
-      chrome.action.setBadgeText({ text: "POP" });
-      setTimeout(() => chrome.action.setBadgeText({ text: "" }), 1500);
       await updateBadgeCount();
       return;
     }
