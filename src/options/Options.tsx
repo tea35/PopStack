@@ -4,6 +4,7 @@ export default function Options() {
   const [enabled, setEnabled] = useState(false);
   const [time, setTime] = useState("09:00");
   const [status, setStatus] = useState("");
+  const [stackCount, setStackCount] = useState<number | null>(null);
 
   useEffect(() => {
     chrome.storage.local.get(
@@ -13,6 +14,11 @@ export default function Options() {
         setTime(res.notifyTime ?? "09:00");
       },
     );
+    chrome.runtime.sendMessage({ type: "GET_BADGE_COUNT" }, (response) => {
+      if (response && typeof response.count === "number") {
+        setStackCount(response.count);
+      }
+    });
   }, []);
 
   const saveSettings = () => {
@@ -61,6 +67,22 @@ export default function Options() {
               毎日の読書ルーティンと通知のタイミングを管理します。
             </p>
           </div>
+
+          {stackCount !== null && (
+            <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Current Stack
+                </span>
+                <span className="text-sm font-medium text-gray-700">
+                  現在の積読数
+                </span>
+              </div>
+              <div className="text-3xl font-black text-blue-600">
+                {stackCount}
+              </div>
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             {/* セクション1：通知 */}

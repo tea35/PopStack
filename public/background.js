@@ -1,111 +1,42 @@
-async function getPopStackFolder() {
-  const bookmarkBar = (await chrome.bookmarks.getTree())[0].children.find(
-    (child) => child.title === "ブックマーク バー" || child.id === "1",
-  );
+import {
+  handleBookmarkAction,
+  getRandomBookmark,
+  updateBadgeCount,
+} from "./background/bookmarks.js";
+import { setupAlarm } from "./background/alarms.js";
+import {
+  showDailyArticleNotification,
+  handleNotificationClick,
+} from "./background/notifications.js";
 
-  let folder = bookmarkBar.children.find(
-    (child) => child.title === "PopStack 📘",
-  );
-  if (!folder) {
-    folder = await chrome.bookmarks.create({
-      parentId: bookmarkBar.id,
-      title: "PopStack 📘",
-    });
-  }
-  return folder;
-}
+chrome.runtime.onInstalled.addListener();
+chrome.runtime.onStartup.addListener(updateBadgeCount);
 
-// アイコンクリック時のイベント
-chrome.action.onClicked.addListener(async (tab) => {
-  if (!tab.url || tab.url.startsWith("chrome://")) return;
+chrome.action.onClicked.addListener(handleBookmarkAction);
 
-  try {
-    const folder = await getPopStackFolder();
-
-    const existing = await chrome.bookmarks.getChildren(folder.id);
-    const bookmark = existing.find((item) => item.url === tab.url);
-    if (bookmark) {
-      await chrome.bookmarks.remove(bookmark.id);
-      chrome.action.setBadgeText({ text: "POP" });
-      setTimeout(() => chrome.action.setBadgeText({ text: "" }), 1500);
-      return;
-    }
-
-    await chrome.bookmarks.create({
-      parentId: folder.id,
-      title: tab.title,
-      url: tab.url,
-    });
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "UPDATE_SETTINGS") {
     setupAlarm();
+  } else if (message.type === "GET_BADGE_COUNT") {
+    updateBadgeCount().then((count) => {
+      sendResponse({ count });
+    });
+    return true;
   }
 });
-
-async function setupAlarm() {
-  const { isNotifyEnabled, notifyTime } = await chrome.storage.local.get([
-    "isNotifyEnabled",
-    "notifyTime",
-  ]);
-
-  await chrome.alarms.clear("dailyPop");
-
-  if (isNotifyEnabled && notifyTime) {
-    const [hours, minutes] = notifyTime.split(":").map(Number);
-    const now = new Date();
-    const scheduledTime = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      hours,
-      minutes,
-      0,
-    );
-
-    if (scheduledTime <= now)
-      scheduledTime.setDate(scheduledTime.getDate() + 1);
-
-    chrome.alarms.create("dailyPop", {
-      when: scheduledTime.getTime(),
-      periodInMinutes: 1440,
-    });
-    console.log(`Alarm set for: ${scheduledTime}`);
-  }
-}
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "dailyPop") {
     const settings = await chrome.storage.local.get(["isNotifyEnabled"]);
     if (settings.isNotifyEnabled === false) return;
 
-    const folder = await getPopStackFolder();
-    const items = await chrome.bookmarks.getChildren(folder.id);
-
-    if (items.length > 0) {
-      // 記事がある場合のみ、ランダムに1つ選んで通知
-      const randomItem = items[Math.floor(Math.random() * items.length)];
-
-      chrome.notifications.create(randomItem.url, {
-        type: "basic",
-        iconUrl: "icon.png",
-        title: "PopStack: 今日の1記事",
-        message: randomItem.title,
-        priority: 2,
-      });
+    const item = await getRandomBookmark();
+    if (item) {
+      showDailyArticleNotification(item);
     } else {
       console.log("PopStack: 積読が空のため通知をスキップしました");
     }
   }
 });
 
-chrome.notifications.onClicked.addListener((notificationId) => {
-  if (notificationId.startsWith("http")) {
-    chrome.tabs.create({ url: notificationId });
-    chrome.notifications.clear(notificationId);
-  }
-});
+chrome.notifications.onClicked.addListener(handleNotificationClick);
