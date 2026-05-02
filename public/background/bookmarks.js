@@ -63,3 +63,19 @@ export async function getRandomBookmark() {
   }
   return null;
 }
+
+export async function saveToPopStack(title, url) {
+  if (!url || url.startsWith("chrome://")) return;
+
+  try {
+    const folder = await getPopStackFolder();
+    await chrome.bookmarks.create({
+      parentId: folder.id,
+      title: title || url,
+      url: url,
+    });
+    await updateBadgeCount();
+  } catch (error) {
+    console.error("PopStack contextmenu error:", error);
+  }
+}
