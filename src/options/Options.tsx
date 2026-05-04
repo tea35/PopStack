@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { t } from "../utils/i18n";
 
 export default function Options() {
   const [enabled, setEnabled] = useState(false);
@@ -28,7 +29,7 @@ export default function Options() {
         notifyTime: time,
       },
       () => {
-        setStatus("設定が保存されました");
+        setStatus(t("saveSuccess"));
         chrome.runtime.sendMessage({ type: "UPDATE_SETTINGS" });
         setTimeout(() => setStatus(""), 2000);
       },
@@ -55,27 +56,20 @@ export default function Options() {
         </div>
       </header>
 
-      {/* ─── メインコンテンツ ─── */}
       <main className="flex-1 overflow-y-auto px-6 py-12 lg:py-20">
         <div className="max-w-3xl mx-auto">
-          {/* ページタイトル */}
           <div className="mb-12">
             <h2 className="text-3xl font-black text-gray-800 tracking-tight">
-              設定
+              {t("optionsTitle")}
             </h2>
-            <p className="text-gray-500 mt-2">
-              毎日の読書ルーティンと通知のタイミングを管理します。
-            </p>
+            <p className="text-gray-500 mt-2">{t("optionsDesc")}</p>
           </div>
 
           {stackCount !== null && (
             <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Current Stack
-                </span>
-                <span className="text-sm font-medium text-gray-700">
-                  現在の積読数
+                  {t("currentStackLabel")}
                 </span>
               </div>
               <div className="text-3xl font-black text-blue-600">
@@ -90,10 +84,10 @@ export default function Options() {
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <h3 className="text-lg font-bold text-gray-800">
-                    デイリー通知
+                    {t("dailyNotifyTitle")}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    毎日、リストの中からランダムに1つの記事をピックアップして通知します。
+                    {t("dailyNotifyDesc")}
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -107,17 +101,16 @@ export default function Options() {
                 </label>
               </div>
 
-              {/* 時間設定（ネストされたUI） */}
               <div
                 className={`mt-8 pt-8 border-t border-gray-50 transition-all duration-300 ${enabled ? "opacity-100" : "opacity-20 pointer-events-none"}`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
                   <div className="sm:w-1/3">
                     <h4 className="text-sm font-bold text-gray-700">
-                      通知時間
+                      {t("notifyTimeTitle")}
                     </h4>
                     <p className="text-xs text-gray-400 mt-1">
-                      何時に通知を受け取りますか？
+                      {t("notifyTimeDesc")}
                     </p>
                   </div>
                   <div className="flex-1">
@@ -132,7 +125,6 @@ export default function Options() {
               </div>
             </div>
 
-            {/* セクション2：保存アクション */}
             <div className="bg-gray-50/50 p-8 md:p-10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-gray-400 font-medium">
                 {status && (
@@ -158,7 +150,7 @@ export default function Options() {
                 onClick={saveSettings}
                 className="w-full sm:w-auto bg-[#2c3e50] text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 active:scale-95 transition-all shadow-lg shadow-gray-200"
               >
-                設定を保存する
+                {t("saveButton")}
               </button>
             </div>
           </div>
