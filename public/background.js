@@ -13,12 +13,12 @@ import {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "popstack-save-link",
-    title: "Save to PopStack",
+    title: chrome.i18n.getMessage("contextMenuLink"),
     contexts: ["link"],
   });
   chrome.contextMenus.create({
     id: "popstack-save-page",
-    title: "Save to PopStack",
+    title: chrome.i18n.getMessage("contextMenuPage"),
     contexts: ["page"],
   });
 });

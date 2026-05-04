@@ -1,0 +1,6 @@
+{
+  "appName": { "message": "PopStack" },
+  "appDesc": { "message": "Pop your tech article reading backlog!" },
+  "contextMenuLink": { "message": "Save link to PopStack" },
+  "contextMenuPage": { "message": "Save page to PopStack" }
+}

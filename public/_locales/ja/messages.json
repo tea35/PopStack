@@ -1,0 +1,6 @@
+{
+  "appName": { "message": "PopStack" },
+  "appDesc": { "message": "技術記事の積読をPopに解消するツール" },
+  "contextMenuLink": { "message": "リンクをPopStackに積む" },
+  "contextMenuPage": { "message": "このページをPopStackに積む" }
+}
