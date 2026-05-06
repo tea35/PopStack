@@ -1,6 +1,11 @@
 {
   "appName": { "message": "PopStack" },
   "appDesc": { "message": "技術記事の積読をPopに解消するツール" },
+  "notificationNoArticles": {
+    "message": "PopStack: 積読が空のため通知をスキップしました"
+  },
+  "notificationTitle": { "message": "PopStack: 今日の1記事" },
+  "notificationSkipButton": { "message": "別の記事にする" },
   "contextMenuLink": { "message": "リンクをPopStackに積む" },
   "contextMenuPage": { "message": "このページをPopStackに積む" }
 }
