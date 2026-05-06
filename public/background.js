@@ -53,6 +53,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 chrome.notifications.onClicked.addListener(handleNotificationClick);
 
+chrome.notifications.onButtonClicked.addListener(
+  async (notificationId, buttonIndex) => {
+    if (buttonIndex === 0) {
+      chrome.notifications.clear(notificationId);
+
+      const item = await getRandomBookmark();
+      if (item) {
+        showDailyArticleNotification(item);
+      }
+    }
+  },
+);
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "popstack-save-link") {
     saveToPopStack(info.linkText || info.linkUrl, info.linkUrl);
