@@ -1,6 +1,11 @@
 {
   "appName": { "message": "PopStack" },
   "appDesc": { "message": "Pop your tech article reading backlog!" },
+  "notificationNoArticles": {
+    "message": "PopStack: No articles to pop, skipping notification"
+  },
+  "notificationTitle": { "message": "PopStack: Today's Article" },
+  "notificationSkipButton": { "message": "Skip to another article" },
   "contextMenuLink": { "message": "Save link to PopStack" },
   "contextMenuPage": { "message": "Save page to PopStack" }
 }

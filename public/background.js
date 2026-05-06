@@ -46,7 +46,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (item) {
       showDailyArticleNotification(item);
     } else {
-      console.log("PopStack: 積読が空のため通知をスキップしました");
+      console.log(chrome.i18n.getMessage("notificationNoArticles"));
     }
   }
 });

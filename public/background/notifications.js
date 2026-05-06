@@ -2,9 +2,10 @@ export function showDailyArticleNotification(item) {
   chrome.notifications.create(item.url, {
     type: "basic",
     iconUrl: "icon.png",
-    title: "PopStack: 今日の1記事",
+    title: chrome.i18n.getMessage("notificationTitle"),
     message: item.title,
     priority: 2,
+    buttons: [{ title: chrome.i18n.getMessage("notificationSkipButton") }],
   });
 }
 
