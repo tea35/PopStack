@@ -7,5 +7,6 @@
   "notificationTitle": { "message": "PopStack: 今日の1記事" },
   "notificationSkipButton": { "message": "別の記事にする" },
   "contextMenuLink": { "message": "リンクをPopStackに積む" },
-  "contextMenuPage": { "message": "このページをPopStackに積む" }
+  "contextMenuPage": { "message": "このページをPopStackに積む" },
+  "badgeDuplicate": { "message": "済" }
 }

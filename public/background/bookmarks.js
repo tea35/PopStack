@@ -69,6 +69,25 @@ export async function saveToPopStack(title, url) {
 
   try {
     const folder = await getPopStackFolder();
+    
+    // 重複チェックロジックを追加
+    const existing = await chrome.bookmarks.getChildren(folder.id);
+    const isDuplicate = existing.some((item) => item.url === url);
+
+    if (isDuplicate) {
+      console.log("PopStack: すでに保存されているURLのためスキップしました", url);
+      
+      const badgeText = chrome.i18n.getMessage("badgeDuplicate") || "!!";
+      chrome.action.setBadgeText({ text: badgeText });
+      chrome.action.setBadgeBackgroundColor({ color: "#F87171" }); // Tailwind Red-400
+      
+      setTimeout(async () => {
+        await updateBadgeCount();
+      }, 1500);
+      
+      return;
+    }
+
     await chrome.bookmarks.create({
       parentId: folder.id,
       title: title || url,
