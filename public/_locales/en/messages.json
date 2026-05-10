@@ -7,5 +7,6 @@
   "notificationTitle": { "message": "PopStack: Today's Article" },
   "notificationSkipButton": { "message": "Skip to another article" },
   "contextMenuLink": { "message": "Save link to PopStack" },
-  "contextMenuPage": { "message": "Save page to PopStack" }
+  "contextMenuPage": { "message": "Save page to PopStack" },
+  "badgeDuplicate": { "message": "DUP" }
 }
