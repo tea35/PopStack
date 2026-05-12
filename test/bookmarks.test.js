@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { saveToPopStack } from "../public/background/bookmarks.js";
+import {
+  saveToPopStack,
+  updateBadgeCount,
+  CONFIG,
+} from "../public/background/bookmarks.js";
 
-// === 1. 偽物のChrome APIの準備 ===
 global.chrome = {
   bookmarks: {
     getTree: vi.fn(),
@@ -17,7 +20,6 @@ global.chrome = {
   },
 };
 
-// console.error や console.log もテスト中にうるさくならないようにモック化
 global.console = {
   ...global.console,
   log: vi.fn(),
@@ -28,8 +30,6 @@ describe("saveToPopStack関数のテスト", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // === 2. 「前提条件」のシミュレーション ===
-    // getTree (フォルダ構造) が呼ばれたら、PopStackフォルダ(id: "99")が存在するフリをする
     chrome.bookmarks.getTree.mockResolvedValue([
       {
         children: [
@@ -43,7 +43,6 @@ describe("saveToPopStack関数のテスト", () => {
     ]);
   });
 
-  // --- すでに実装済みのテスト ---
   it("URLが空の場合は何もせずに終了すること", async () => {
     await saveToPopStack("タイトル", null);
     expect(chrome.bookmarks.create).not.toHaveBeenCalled();
@@ -54,15 +53,11 @@ describe("saveToPopStack関数のテスト", () => {
     expect(chrome.bookmarks.create).not.toHaveBeenCalled();
   });
 
-  // --- 追加するテスト ---
-
   it("正常なURLが渡された場合、正しくブックマークが生成されること", async () => {
-    // フォルダの中身（getChildren）は空っぽのフリをする
     chrome.bookmarks.getChildren.mockResolvedValue([]);
 
     await saveToPopStack("テスト記事", "https://example.com");
 
-    // 検証：createが1回呼ばれ、正しい親ID, タイトル, URLが渡されているか？
     expect(chrome.bookmarks.create).toHaveBeenCalledTimes(1);
     expect(chrome.bookmarks.create).toHaveBeenCalledWith({
       parentId: "99",
@@ -72,32 +67,26 @@ describe("saveToPopStack関数のテスト", () => {
   });
 
   it("タイトルが空の場合は、URL自体をタイトルとして保存すること", async () => {
-    // フォルダの中身（getChildren）は空っぽのフリをする
     chrome.bookmarks.getChildren.mockResolvedValue([]);
 
     await saveToPopStack("", "https://example.com/notitle");
 
-    // 検証：タイトル部分にURLが入っているか？
     expect(chrome.bookmarks.create).toHaveBeenCalledWith({
       parentId: "99",
-      title: "https://example.com/notitle", // タイトルの代わりにURLになっている！
+      title: "https://example.com/notitle",
       url: "https://example.com/notitle",
     });
   });
 
   it("すでに保存されているURLの場合は追加せず、バッジで警告を出すこと", async () => {
-    // フォルダの中にすでに同じURLが入っているフリをする
     chrome.bookmarks.getChildren.mockResolvedValue([
       { title: "既存の記事", url: "https://example.com/dup" },
     ]);
-    // i18nの翻訳「済」が返ってくるフリをする
     chrome.i18n.getMessage.mockReturnValue("済");
 
     await saveToPopStack("重複記事", "https://example.com/dup");
 
-    // 検証：新しく作られていないこと
     expect(chrome.bookmarks.create).not.toHaveBeenCalled();
-    // 検証：バッジが「済」になり、色が赤っぽくなっていること
     expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "済" });
     expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
       color: "#f87171",
@@ -105,13 +94,94 @@ describe("saveToPopStack関数のテスト", () => {
   });
 
   it("保存処理中に予期せぬエラーが起きた場合、クラッシュせずにconsole.errorを出力すること", async () => {
-    // getTree時に無理やりエラーを起こすフリをする
     chrome.bookmarks.getTree.mockRejectedValue(new Error("謎の通信エラー"));
 
-    // エラーが起きてもアプリが落ちずに最後まで実行されるか確認
     await saveToPopStack("エラー記事", "https://example.com/error");
-
-    // 検証：console.errorが呼ばれたこと
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("updateBadgeCount関数のテスト", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    chrome.bookmarks.getTree.mockResolvedValue([
+      {
+        children: [
+          {
+            title: "ブックマーク バー",
+            id: "1",
+            children: [{ title: "PopStack 📘", id: "99" }],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("PopStackフォルダが空の場合、バッジが消えること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue([]);
+
+    const count = await updateBadgeCount();
+
+    expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "" });
+    expect(count).toBe(0);
+  });
+
+  it("PopStackフォルダ内のブックマーク数がバッジに正しく反映されること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue([
+      { title: "記事1", url: "https://example.com/1" },
+      { title: "記事2", url: "https://example.com/2" },
+      { title: "記事3", url: "https://example.com/3" },
+    ]);
+
+    const count = await updateBadgeCount();
+
+    expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "3" });
+    expect(count).toBe(3);
+  });
+
+  it("ブックマーク数が閾値直前まで色が変わらないこと", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue(
+      Array.from({ length: CONFIG.BADGE_WARNING_THRESHOLD - 1 }, (_, i) => ({
+        title: `記事${i + 1}`,
+        url: `https://example.com/${i + 1}`,
+      })),
+    );
+    const count = await updateBadgeCount();
+
+    expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+      color: "#2c3e50",
+    });
+    expect(count).toBe(CONFIG.BADGE_WARNING_THRESHOLD - 1);
+  });
+
+  it("ブックマーク数が閾値に達したときに色が警告色に変わること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue(
+      Array.from({ length: CONFIG.BADGE_WARNING_THRESHOLD }, (_, i) => ({
+        title: `記事${i + 1}`,
+        url: `https://example.com/${i + 1}`,
+      })),
+    );
+    const count = await updateBadgeCount();
+
+    expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+      color: "#ef4444",
+    });
+    expect(count).toBe(CONFIG.BADGE_WARNING_THRESHOLD);
+  });
+
+  it("ブックマーク数が閾値を遥かに超えたときにも色が警告色のままであること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue(
+      Array.from({ length: CONFIG.BADGE_WARNING_THRESHOLD + 20 }, (_, i) => ({
+        title: `記事${i + 1}`,
+        url: `https://example.com/${i + 1}`,
+      })),
+    );
+    const count = await updateBadgeCount();
+
+    expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+      color: "#ef4444",
+    });
+    expect(count).toBe(CONFIG.BADGE_WARNING_THRESHOLD + 20);
   });
 });
