@@ -3,6 +3,7 @@ import {
   saveToPopStack,
   updateBadgeCount,
   handleBookmarkAction,
+  getRandomBookmark,
   CONFIG,
 } from "../public/background/bookmarks.js";
 
@@ -249,5 +250,45 @@ describe("handleBookmarkAction関数のテスト", () => {
 
     await handleBookmarkAction({ url: "https://example.com/error" });
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("getRandomBookmark関数のテスト", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    chrome.bookmarks.getTree.mockResolvedValue([
+      {
+        children: [
+          {
+            title: "ブックマーク バー",
+            id: "1",
+            children: [{ title: "PopStack 📘", id: "99" }],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("ブックマークが存在する場合、ランダムな1件を返すこと", async () => {
+    const mockItems = [
+      { id: "a", title: "A", url: "https://a.com" },
+      { id: "b", title: "B", url: "https://b.com" },
+      { id: "c", title: "C", url: "https://c.com" },
+    ];
+    chrome.bookmarks.getChildren.mockResolvedValue(mockItems);
+
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+
+    const result = await getRandomBookmark();
+
+    expect(result).toEqual({ id: "b", title: "B", url: "https://b.com" });
+
+    Math.random.mockRestore();
+  });
+
+  it("ブックマークが存在しない場合、nullを返すこと", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue([]);
+    const result = await getRandomBookmark();
+    expect(result).toBeNull();
   });
 });
