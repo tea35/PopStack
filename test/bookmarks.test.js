@@ -4,6 +4,7 @@ import {
   updateBadgeCount,
   handleBookmarkAction,
   getRandomBookmark,
+  getPopStackFolder,
   CONFIG,
 } from "../public/background/bookmarks.js";
 
@@ -290,5 +291,41 @@ describe("getRandomBookmark関数のテスト", () => {
     chrome.bookmarks.getChildren.mockResolvedValue([]);
     const result = await getRandomBookmark();
     expect(result).toBeNull();
+  });
+});
+
+describe("getPopStackFolder関数のテスト", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("PopStackフォルダが存在しない場合、新規にフォルダを作成して返すこと", async () => {
+    chrome.bookmarks.getTree.mockResolvedValue([
+      {
+        children: [
+          {
+            title: "ブックマーク バー",
+            id: "1",
+            children: [],
+          },
+        ],
+      },
+    ]);
+    chrome.bookmarks.create.mockResolvedValue({
+      id: "created_99",
+      title: "PopStack 📘",
+      parentId: "1",
+    });
+
+    const folder = await getPopStackFolder();
+
+    expect(chrome.bookmarks.create).toHaveBeenCalledWith({
+      parentId: "1",
+      title: "PopStack 📘",
+    });
+
+    expect(folder).toEqual({
+      id: "created_99",
+      title: "PopStack 📘",
+      parentId: "1",
+    });
   });
 });
