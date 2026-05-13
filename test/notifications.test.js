@@ -45,3 +45,29 @@ describe("showDailyArticleNotification関数のテスト", () => {
     );
   });
 });
+
+describe("handleNotificationClick関数のテスト", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("通知IDがhttpから始まる場合、新しいタブを開いて通知をクリアすること", () => {
+    const notificationId = "https://example.com/article";
+
+    handleNotificationClick(notificationId);
+
+    expect(chrome.tabs.create).toHaveBeenCalledWith({
+      url: "https://example.com/article",
+    });
+    expect(chrome.notifications.clear).toHaveBeenCalledWith(
+      "https://example.com/article",
+    );
+  });
+
+  it("通知IDがhttpから始まらない場合（システム通知等）、何もしないこと", () => {
+    const notificationId = "some-system-message-id";
+
+    handleNotificationClick(notificationId);
+
+    expect(chrome.tabs.create).not.toHaveBeenCalled();
+    expect(chrome.notifications.clear).not.toHaveBeenCalled();
+  });
+});

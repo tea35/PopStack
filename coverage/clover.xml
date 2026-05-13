@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1778652951613" clover="3.2.0">
-  <project timestamp="1778652951613" name="All files">
-    <metrics statements="55" coveredstatements="52" conditionals="28" coveredconditionals="24" methods="12" coveredmethods="11" elements="95" coveredelements="87" complexity="0" loc="55" ncloc="55" packages="1" files="2" classes="2"/>
+<coverage generated="1778653225747" clover="3.2.0">
+  <project timestamp="1778653225747" name="All files">
+    <metrics statements="51" coveredstatements="51" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="10" elements="87" coveredelements="85" complexity="0" loc="51" ncloc="51" packages="1" files="1" classes="1"/>
     <file name="bookmarks.js" path="/Users/kosei/myapp/popstack/public/background/bookmarks.js">
       <metrics statements="51" coveredstatements="51" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="10"/>
       <line num="1" count="1" type="stmt"/>
@@ -55,13 +55,6 @@
       <line num="104" count="2" type="stmt"/>
       <line num="109" count="2" type="stmt"/>
       <line num="111" count="1" type="stmt"/>
-    </file>
-    <file name="notifications.js" path="/Users/kosei/myapp/popstack/public/background/notifications.js">
-      <metrics statements="4" coveredstatements="1" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="1"/>
-      <line num="2" count="1" type="stmt"/>
-      <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
-      <line num="14" count="0" type="stmt"/>
-      <line num="15" count="0" type="stmt"/>
     </file>
   </project>
 </coverage>
