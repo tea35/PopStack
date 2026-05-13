@@ -82,7 +82,10 @@ describe("saveToPopStack関数のテスト", () => {
     });
   });
 
-  it("すでに保存されているURLの場合は追加せず、バッジで警告を出すこと", async () => {
+  it("すでに保存されているURLの場合は追加せず、バッジで警告を出し1.5秒後に元に戻すこと", async () => {
+    // 仮想の時計を使う
+    vi.useFakeTimers();
+
     chrome.bookmarks.getChildren.mockResolvedValue([
       { title: "既存の記事", url: "https://example.com/dup" },
     ]);
@@ -92,9 +95,15 @@ describe("saveToPopStack関数のテスト", () => {
 
     expect(chrome.bookmarks.create).not.toHaveBeenCalled();
     expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "済" });
-    expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
-      color: "#f87171",
-    });
+
+    // ここで強制的に CONFIG.BADGE_ALERT_DURATION_MS (1.5秒) 後に時間を進める！
+    await vi.runAllTimersAsync();
+
+    // updateBadgeCount が中で呼ばれ、バッジが元の「1件」の表示に戻ったか検証
+    expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "1" });
+
+    // 仮想の時計を元の現実の時計に戻す
+    vi.useRealTimers();
   });
 
   it("保存処理中に予期せぬエラーが起きた場合、クラッシュせずにconsole.errorを出力すること", async () => {

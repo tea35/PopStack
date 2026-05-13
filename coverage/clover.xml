@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1778651876362" clover="3.2.0">
-  <project timestamp="1778651876362" name="All files">
-    <metrics statements="51" coveredstatements="50" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="9" elements="87" coveredelements="83" complexity="0" loc="51" ncloc="51" packages="1" files="1" classes="1"/>
+<coverage generated="1778652358665" clover="3.2.0">
+  <project timestamp="1778652358665" name="All files">
+    <metrics statements="51" coveredstatements="51" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="10" elements="87" coveredelements="85" complexity="0" loc="51" ncloc="51" packages="1" files="1" classes="1"/>
     <file name="bookmarks.js" path="/Users/kosei/myapp/popstack/public/background/bookmarks.js">
-      <metrics statements="51" coveredstatements="50" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="9"/>
+      <metrics statements="51" coveredstatements="51" conditionals="26" coveredconditionals="24" methods="10" coveredmethods="10"/>
       <line num="1" count="1" type="stmt"/>
-      <line num="7" count="19" type="stmt"/>
-      <line num="8" count="18" type="cond" truecount="1" falsecount="1"/>
-      <line num="11" count="18" type="stmt"/>
-      <line num="12" count="17" type="stmt"/>
-      <line num="14" count="18" type="cond" truecount="2" falsecount="0"/>
+      <line num="7" count="20" type="stmt"/>
+      <line num="8" count="19" type="cond" truecount="1" falsecount="1"/>
+      <line num="11" count="19" type="stmt"/>
+      <line num="12" count="18" type="stmt"/>
+      <line num="14" count="19" type="cond" truecount="2" falsecount="0"/>
       <line num="15" count="1" type="stmt"/>
-      <line num="20" count="18" type="stmt"/>
-      <line num="24" count="9" type="stmt"/>
-      <line num="25" count="9" type="stmt"/>
-      <line num="26" count="9" type="stmt"/>
-      <line num="28" count="9" type="cond" truecount="2" falsecount="0"/>
-      <line num="29" count="5" type="stmt"/>
-      <line num="32" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="20" count="19" type="stmt"/>
+      <line num="24" count="10" type="stmt"/>
+      <line num="25" count="10" type="stmt"/>
+      <line num="26" count="10" type="stmt"/>
+      <line num="28" count="10" type="cond" truecount="2" falsecount="0"/>
+      <line num="29" count="6" type="stmt"/>
+      <line num="32" count="6" type="cond" truecount="2" falsecount="0"/>
       <line num="33" count="2" type="stmt"/>
-      <line num="35" count="3" type="stmt"/>
+      <line num="35" count="4" type="stmt"/>
       <line num="38" count="4" type="stmt"/>
-      <line num="40" count="9" type="stmt"/>
+      <line num="40" count="10" type="stmt"/>
       <line num="44" count="5" type="cond" truecount="4" falsecount="0"/>
       <line num="46" count="3" type="stmt"/>
       <line num="47" count="3" type="stmt"/>
@@ -50,7 +50,7 @@
       <line num="94" count="1" type="stmt"/>
       <line num="95" count="1" type="stmt"/>
       <line num="97" count="1" type="stmt"/>
-      <line num="98" count="0" type="stmt"/>
+      <line num="98" count="1" type="stmt"/>
       <line num="101" count="1" type="stmt"/>
       <line num="104" count="2" type="stmt"/>
       <line num="109" count="2" type="stmt"/>
