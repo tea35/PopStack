@@ -1,4 +1,4 @@
-const CONFIG = {
+export const CONFIG = {
   BADGE_WARNING_THRESHOLD: 30, // 警告色に変わる積読数
   BADGE_ALERT_DURATION_MS: 1500, // 重複時の警告バッジ表示時間(ミリ秒)
 };
