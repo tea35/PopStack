@@ -9,7 +9,7 @@ import {
   showDailyArticleNotification,
   handleNotificationClick,
 } from "./background/notifications.js";
-import "./background/ominibox.js";
+import "./background/omnibox.js";
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
