@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   saveToPopStack,
   updateBadgeCount,
+  handleBookmarkAction,
   CONFIG,
 } from "../public/background/bookmarks.js";
 
@@ -10,6 +11,7 @@ global.chrome = {
     getTree: vi.fn(),
     getChildren: vi.fn(),
     create: vi.fn(),
+    remove: vi.fn(),
   },
   action: {
     setBadgeText: vi.fn(),
@@ -183,5 +185,69 @@ describe("updateBadgeCount関数のテスト", () => {
       color: "#ef4444",
     });
     expect(count).toBe(CONFIG.BADGE_WARNING_THRESHOLD + 20);
+  });
+});
+
+describe("handleBookmarkAction関数のテスト", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    chrome.bookmarks.getTree.mockResolvedValue([
+      {
+        children: [
+          {
+            title: "ブックマーク バー",
+            id: "1",
+            children: [{ title: "PopStack 📘", id: "99" }],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("URLが空の場合は何もせずに終了すること", async () => {
+    await handleBookmarkAction({ url: null });
+    expect(chrome.bookmarks.create).not.toHaveBeenCalled();
+    expect(chrome.bookmarks.remove).not.toHaveBeenCalled();
+  });
+
+  it("chrome:// から始まるURLの場合は保存しないこと", async () => {
+    await handleBookmarkAction({ url: "chrome://settings" });
+    expect(chrome.bookmarks.create).not.toHaveBeenCalled();
+    expect(chrome.bookmarks.remove).not.toHaveBeenCalled();
+  });
+
+  it("未保存の記事ページでアイコンを押した場合、ブックマークが追加されること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue([]);
+
+    await handleBookmarkAction({
+      url: "https://example.com/new",
+      title: "新記事",
+    });
+
+    expect(chrome.bookmarks.create).toHaveBeenCalledWith({
+      parentId: "99",
+      title: "新記事",
+      url: "https://example.com/new",
+    });
+    expect(chrome.bookmarks.remove).not.toHaveBeenCalled();
+  });
+
+  it("すでに保存されている記事ページでアイコンを押した場合、ブックマークが削除されること", async () => {
+    chrome.bookmarks.getChildren.mockResolvedValue([
+      { title: "既存の記事", url: "https://example.com/existing", id: "123" },
+    ]);
+
+    await handleBookmarkAction({ url: "https://example.com/existing" });
+
+    expect(chrome.bookmarks.create).not.toHaveBeenCalled();
+    expect(chrome.bookmarks.remove).toHaveBeenCalledWith("123");
+  });
+
+  it("保存処理中に予期せぬエラーが起きた場合、クラッシュせずにconsole.errorを出力すること", async () => {
+    chrome.bookmarks.getChildren.mockRejectedValue(new Error("謎の通信エラー"));
+
+    await handleBookmarkAction({ url: "https://example.com/error" });
+    expect(console.error).toHaveBeenCalled();
   });
 });
